@@ -2,13 +2,17 @@ const { Router } = require("express");
 require("dotenv").config();
 const { authentication } = require("../middlewares/authentication");
 const { vendorModel } = require("../models/Vendor.model");
-
+import { Request, Response } from "express";
 const { OrderModel } = require("../models/Order.model");
 
 const orderRoutes = Router();
 
+interface Vendor {
+  selling_price: number;
+}
+
 // createOrder - (placed by sales guy)
-orderRoutes.post("/create", authentication, async (req, res) => {
+orderRoutes.post("/create", authentication, async (req:Request, res:Response) => {
   const newOrder = new OrderModel({ ...req.body, status: "created" });
   try {
     await newOrder.save();
@@ -20,7 +24,7 @@ orderRoutes.post("/create", authentication, async (req, res) => {
 });
 
 // viewOrder - (with the vendor details assigned by the system)
-orderRoutes.patch("/view/:orderId", authentication, async (req, res) => {
+orderRoutes.patch("/view/:orderId", authentication, async (req:Request, res:Response) => {
   const { orderId } = req.params;
   try {
     // To find the order
@@ -31,7 +35,7 @@ orderRoutes.patch("/view/:orderId", authentication, async (req, res) => {
 
     // To find the vendor with low selling price
     const venders = await vendorModel.find({ product: productId });
-    const selected_vendor = venders.reduce((previous, current) => {
+    const selected_vendor = venders.reduce((previous:Vendor, current:Vendor) => {
       return current.selling_price < previous.selling_price
         ? current
         : previous;
@@ -54,7 +58,7 @@ orderRoutes.patch("/view/:orderId", authentication, async (req, res) => {
 });
 
 // commitOrder - finalize the order and move it for fulfillment
-orderRoutes.patch("/commit/:orderId", async (req, res) => {
+orderRoutes.patch("/commit/:orderId", async (req:Request, res:Response) => {
   const { orderId } = req.params;
   try {
     const updatedOrder = await OrderModel.findOneAndUpdate(

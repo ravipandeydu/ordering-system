@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const vendorSchema = new mongoose.Schema(
   {
     username: { type: String, require: true },
